@@ -4,7 +4,7 @@
 *.exe
 *.msi
 *.deb
-*.zip
+*.zip 
 *.tgz
 *.log
 *.log.*
@@ -12,3 +12,7 @@
 
 pkg/
 src/
+
+.vscode/
+*.DS_Store
+

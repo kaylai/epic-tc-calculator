@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TC Temp Calculator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>TC Temperature Calculator</h1>
+    <button class="info-btn" onclick="showDocs()" title="Documentation">&#9432;</button>
+  </header>
+
+  <!-- Calculator -->
+  <div class="main" id="mainPage">
+    <div class="container">
+      <div class="card">
+        <div class="section-title">Apparatus</div>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-apparatus="taylor" onclick="setApparatus('taylor')">Taylor</button>
+          <button class="toggle-btn active" data-apparatus="rosie" onclick="setApparatus('rosie')">Rosie</button>
+        </div>
+        <div class="spool-row">
+          <span class="section-title">Thermocouple Spool</span>
+          <div class="spool-toggle">
+            <button class="spool-btn" data-spool="first" onclick="setSpool('first')">2014</button>
+            <button class="spool-btn active" data-spool="second" onclick="setSpool('second')">2015</button>
+        </div>
+      </div>
+    </div>
+
+      <div class="card">
+        <div class="unit-row">
+          <span class="section-title" style="margin:0">Dimensions</span>
+          <div class="unit-toggle">
+            <button class="unit-btn active" data-unit="in" onclick="setUnit('in')">in</button>
+            <button class="unit-btn" data-unit="mm" onclick="setUnit('mm')">mm</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Shield Thickness (<span class="unit-label">inches</span>)</label>
+          <input type="number" id="shield" step="any" oninput="calculate()">
+        </div>
+        <div class="input-group">
+          <label>Capsule Height (<span class="unit-label">inches</span>)</label>
+          <input type="number" id="capsule" step="any" oninput="calculate()">
+        </div>
+        <div class="input-group">
+          <label>Desired Temperature (&#176;C)</label>
+          <input type="number" id="desired" step="1" value="800" oninput="calculate()">
+        </div>
+      </div>
+
+      <div class="card result-card">
+        <div class="result-label">Set Eurotherm to:</div>
+        <div class="result-value"><span id="result">--</span><span class="result-unit"> &#176;C</span></div>
+        <div class="breakdown">
+          <div class="breakdown-row">
+            <span>Desired temp:</span>
+            <span id="b-desired">-- &#176;C</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Shield correction:</span>
+            <span id="b-shield">-- &#176;C</span>
+          </div>
+          <div class="breakdown-row">
+            <span>TC deviation:</span>
+            <span id="b-dev">-- &#176;C</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="legacy-link">
+        <a href="#" onclick="showLegacySpool(); return false;">Using legacy 2014 spool?</a>
+      </div> -->
+      <p class="note">T = Desired &#8722; Shield Correction &#8722; TC Deviation</p>
+    </div>
+  </div>
+
+  <!-- Documentation -->
+  <div class="docs-page" id="docsPage">
+    <div class="docs-container">
+      <button class="back-btn" onclick="hideDocs()">&#8592; Back</button>
+
+      <div class="docs-section">
+        <h2>Instructions</h2>
+        <p>This calculator determines the temperature to program into the
+        Eurotherm controller to achieve your desired run temperature,
+        accounting for thermocouple positioning and calibration deviations.</p>
+
+        <h3>How to Use</h3>
+        <ol>
+          <li>Select your apparatus (Taylor or Rosie)</li>
+          <li>Enter the thermocouple shield thickness</li>
+          <li>Enter the capsule height</li>
+          <li>Enter your desired run temperature in &#176;C</li>
+          <li>The calculator displays the corrected temperature to set on the Eurotherm</li>
+        </ol>
+
+        <div class="formula-box">
+          T<sub>set</sub> = T<sub>desired</sub> &#8722; T<sub>shield</sub> &#8722; T<sub>deviation</sub>
+        </div>
+
+        <div class="example-box">
+          <strong>Example:</strong>
+          <p style="margin-top:6px">If desired run temperature is 800&#176;C
+          with Taylor apparatus (shield: 0.063", capsule: 0.256"),
+          using the 2015 spool:</p>
+          <p>T<sub>set</sub> = 800 &#8722; 36.3 &#8722; 6.7 = <strong>757&#176;C</strong></p>
+        </div>
+      </div>
+
+      <div class="docs-section">
+        <h2>TC Shield Correction</h2>
+        <p>The shield correction accounts for the distance from the
+        thermocouple tip to the middle of the sample capsule. This offset
+        causes a temperature difference between the measured and actual
+        sample temperature.</p>
+
+        <h3>Calculation</h3>
+        <p>The distance from TC to sample middle (post run) is:</p>
+        <div class="formula-box">
+          d = shield<sub>mm</sub> + (capsule<sub>mm</sub> / 2)
+        </div>
+        <p>The temperature correction is then derived from calibration data
+        relating position to temperature offset.</p>
+
+        <h3>Reference Values</h3>
+        <table class="data-table">
+          <tr>
+            <th>Apparatus</th><th>Shield (in)</th><th>Capsule (in)</th>
+            <th>Shield (mm)</th><th>Capsule (mm)</th>
+            <th>TC to mid (mm)</th><th>Correction (&#176;C)</th>
+          </tr>
+          <tr>
+            <td>Taylor</td><td>0.063</td><td>0.256</td>
+            <td>1.600</td><td>6.502</td><td>4.461</td><td>36.3</td>
+          </tr>
+          <tr>
+            <td>Rosie</td><td>0.020</td><td>0.320</td>
+            <td>0.508</td><td>8.128</td><td>4.448</td><td>47.1</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="docs-section">
+        <h2>TC Deviation Data</h2>
+        <p>Thermocouple deviation represents the difference between the
+        temperature reading and actual temperature. This varies with
+        temperature and differs between thermocouple spools.</p>
+
+        <div class="example-box">
+          <strong>Interpretation:</strong>
+          <p style="margin-top:6px">If the thermocouple reads 100&#176;C but
+          actual temperature is 103.2&#176;C, then to achieve a true
+          100&#176;C, set the controller to 96.8&#176;C.</p>
+        </div>
+
+        <h3>First Spool (2014)</h3>
+        <p class="muted-italic">This spool is typically used on Taylor.</p>
+        <div class="chart-container">
+          <div class="chart-title">TC Deviation vs Temperature (2014 Spool)</div>
+          <canvas id="chart2014" width="560" height="300"></canvas>
+        </div>
+        <details>
+          <summary>Show data table</summary>
+          <table class="data-table" id="table2014"></table>
+        </details>
+
+        <h3>Second Spool (2015)</h3>
+        <p class="muted-italic">This spool is typically used on Rosie.</p>
+        <div class="chart-container">
+          <div class="chart-title">TC Deviation vs Temperature (2015 Spool)</div>
+          <canvas id="chart2015" width="560" height="300"></canvas>
+        </div>
+        <details>
+          <summary>Show data table</summary>
+          <table class="data-table" id="table2015"></table>
+        </details>
+      </div>
+
+      <div class="docs-section">
+        <h2>Taylor Calibration Data</h2>
+        <p>Temperature profile from spinel growth calibration for the
+        Taylor apparatus.</p>
+        <div class="formula-box formula-sm">
+          y = 3.71&#215;10&#8315;&#178;x&#179; &#8722; 2.97x&#178; + 54.5x + 654
+        </div>
+        <p class="muted">Max temperature: 944.4&#176;C at position 11.77 mm</p>
+        <div class="chart-container">
+          <div class="chart-title">Temperature vs Position (Taylor)</div>
+          <canvas id="chartTaylor" width="560" height="300"></canvas>
+        </div>
+        <details>
+          <summary>Show data table</summary>
+          <table class="data-table" id="tableTaylor"></table>
+        </details>
+      </div>
+
+      <div class="docs-section">
+        <h2>Rosie Calibration Data</h2>
+        <p>Temperature profile from spinel growth calibration for the
+        Rosie apparatus.</p>
+        <div class="formula-box formula-sm">
+          y = &#8722;1.36&#215;10&#8315;&#178;x&#8308; + 0.607x&#179; &#8722; 12.3x&#178; + 124x + 464
+        </div>
+        <p class="muted">Max temperature: 946.1&#176;C at position 11.28 mm</p>
+        <div class="chart-container">
+          <div class="chart-title">Temperature vs Position (Rosie)</div>
+          <canvas id="chartRosie" width="560" height="300"></canvas>
+        </div>
+        <details>
+          <summary>Show data table</summary>
+          <table class="data-table" id="tableRosie"></table>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
