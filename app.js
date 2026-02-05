@@ -150,9 +150,21 @@ function interpolate(data, x) {
 }
 
 // Shield correction from TC-to-sample-center distance (mm).
+function taylorPoly(x) {
+  return 0.037129*x*x*x - 2.9693*x*x + 54.464*x + 654.14;
+}
+
+function rosiePoly(x) {
+  return -0.013609*x*x*x*x + 0.60653*x*x*x - 12.281*x*x + 123.67*x + 463.54;
+}
+
+var PEAK = { taylor: 11.7692285645831, rosie: 11.2807309644187 };
+
 function getShieldCorrection(shieldMm, capsuleMm) {
-  var tcToMiddle = shieldMm + (capsuleMm / 2);
-  return tcToMiddle * 8.1392;
+  var tcToMiddle = (capsuleMm / 2) + (shieldMm * 0.756);
+  var xMax = PEAK[apparatus];
+  var poly = apparatus === 'taylor' ? taylorPoly : rosiePoly;
+  return poly(xMax) - poly(xMax - tcToMiddle);
 }
 
 // Reads inputs, computes result, updates DOM.
