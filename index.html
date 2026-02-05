@@ -61,7 +61,7 @@
             <span id="b-desired">-- &#176;C</span>
           </div>
           <div class="breakdown-row">
-            <span>Shield correction:</span>
+            <span>Hot spot correction:</span>
             <span id="b-shield">-- &#176;C</span>
           </div>
           <div class="breakdown-row">
@@ -74,7 +74,7 @@
       <!-- <div class="legacy-link">
         <a href="#" onclick="showLegacySpool(); return false;">Using legacy 2014 spool?</a>
       </div> -->
-      <p class="note">T = Desired &#8722; Shield Correction &#8722; TC Deviation</p>
+      <p class="note">T = Desired &#8722; Hot Spot Correction &#8722; TC Deviation</p>
     </div>
   </div>
 
@@ -99,63 +99,65 @@
         </ol>
 
         <div class="formula-box">
-          T<sub>set</sub> = T<sub>desired</sub> &#8722; T<sub>shield</sub> &#8722; T<sub>deviation</sub>
-        </div>
-
-        <div class="example-box">
-          <strong>Example:</strong>
-          <p style="margin-top:6px">If desired run temperature is 800&#176;C
-          with Taylor apparatus (shield: 0.063", capsule: 0.256"),
-          using the 2015 spool:</p>
-          <p>T<sub>set</sub> = 800 &#8722; 36.3 &#8722; 6.7 = <strong>757&#176;C</strong></p>
+          T<sub>set</sub> = T<sub>desired</sub> &#8722; T<sub>hot-spot</sub> &#8722; T<sub>deviation</sub>
         </div>
       </div>
 
       <div class="docs-section">
-        <h2>TC Shield Correction</h2>
-        <p>The shield correction accounts for the distance from the
-        thermocouple tip to the middle of the sample capsule. This offset
-        causes a temperature difference between the measured and actual
-        sample temperature.</p>
+        <h2>TC Hot Spot Correction</h2>
+        <p>The hot spot correction accounts for the distance from the
+        thermocouple tip to the middle of the sample capsule, including
+        the extra offset caused by the TC shield. This causes a temperature
+        difference between the measured and actual sample temperature.</p>
 
         <h3>Calculation</h3>
         <p>The distance from TC to sample middle (post run) is:</p>
         <div class="formula-box">
-          d = shield<sub>mm</sub> + (capsule<sub>mm</sub> / 2)
+          d = (shield<sub>mm</sub> * 0.756) + (capsule<sub>mm</sub> / 2)
         </div>
         <p>The temperature correction is then derived from calibration data
         relating position to temperature offset.</p>
-
-        <h3>Reference Values</h3>
-        <table class="data-table">
-          <tr>
-            <th>Apparatus</th><th>Shield (in)</th><th>Capsule (in)</th>
-            <th>Shield (mm)</th><th>Capsule (mm)</th>
-            <th>TC to mid (mm)</th><th>Correction (&#176;C)</th>
-          </tr>
-          <tr>
-            <td>Taylor</td><td>0.063</td><td>0.256</td>
-            <td>1.600</td><td>6.502</td><td>4.461</td><td>36.3</td>
-          </tr>
-          <tr>
-            <td>Rosie</td><td>0.020</td><td>0.320</td>
-            <td>0.508</td><td>8.128</td><td>4.448</td><td>47.1</td>
-          </tr>
-        </table>
+        </div>
+      <div class="docs-section">
+        <h2>Taylor Calibration Data</h2>
+        <p>Temperature profile from spinel growth calibration for the
+        Taylor apparatus.</p>
+        <div class="formula-box formula-sm">
+          y = 0.0371x&#179; - 2.97x&#178; + 54.5x + 654
+        </div>
+        <p class="muted">Max temperature: 944.4&#176;C at position 11.77 mm</p>
+        <div class="chart-container">
+          <div class="chart-title">Temperature vs Position (Taylor)</div>
+          <canvas id="chartTaylor" width="560" height="300"></canvas>
+        </div>
+        <details>
+          <summary>Show data table</summary>
+          <table class="data-table" id="tableTaylor"></table>
+        </details>
       </div>
 
       <div class="docs-section">
+        <h2>Rosie Calibration Data</h2>
+        <p>Temperature profile from spinel growth calibration for the
+        Rosie apparatus.</p>
+        <div class="formula-box formula-sm">
+          y = -0.0136x&#8308; + 0.607x&#179; - 12.3x&#178; + 124x + 464
+        </div>
+        <p class="muted">Max temperature: 946.1&#176;C at position 11.28 mm</p>
+        <div class="chart-container">
+          <div class="chart-title">Temperature vs Position (Rosie)</div>
+          <canvas id="chartRosie" width="560" height="300"></canvas>
+        </div>
+        <details>
+          <summary>Show data table</summary>
+          <table class="data-table" id="tableRosie"></table>
+        </details>
+      </div>
+          <div class="docs-section">
         <h2>TC Deviation Data</h2>
         <p>Thermocouple deviation represents the difference between the
         temperature reading and actual temperature. This varies with
         temperature and differs between thermocouple spools.</p>
-
-        <div class="example-box">
-          <strong>Interpretation:</strong>
-          <p style="margin-top:6px">If the thermocouple reads 100&#176;C but
-          actual temperature is 103.2&#176;C, then to achieve a true
-          100&#176;C, set the controller to 96.8&#176;C.</p>
-        </div>
 
         <h3>First Spool (2014)</h3>
         <p class="muted-italic">This spool is typically used on Taylor.</p>
@@ -177,42 +179,6 @@
         <details>
           <summary>Show data table</summary>
           <table class="data-table" id="table2015"></table>
-        </details>
-      </div>
-
-      <div class="docs-section">
-        <h2>Taylor Calibration Data</h2>
-        <p>Temperature profile from spinel growth calibration for the
-        Taylor apparatus.</p>
-        <div class="formula-box formula-sm">
-          y = 3.71&#215;10&#8315;&#178;x&#179; &#8722; 2.97x&#178; + 54.5x + 654
-        </div>
-        <p class="muted">Max temperature: 944.4&#176;C at position 11.77 mm</p>
-        <div class="chart-container">
-          <div class="chart-title">Temperature vs Position (Taylor)</div>
-          <canvas id="chartTaylor" width="560" height="300"></canvas>
-        </div>
-        <details>
-          <summary>Show data table</summary>
-          <table class="data-table" id="tableTaylor"></table>
-        </details>
-      </div>
-
-      <div class="docs-section">
-        <h2>Rosie Calibration Data</h2>
-        <p>Temperature profile from spinel growth calibration for the
-        Rosie apparatus.</p>
-        <div class="formula-box formula-sm">
-          y = &#8722;1.36&#215;10&#8315;&#178;x&#8308; + 0.607x&#179; &#8722; 12.3x&#178; + 124x + 464
-        </div>
-        <p class="muted">Max temperature: 946.1&#176;C at position 11.28 mm</p>
-        <div class="chart-container">
-          <div class="chart-title">Temperature vs Position (Rosie)</div>
-          <canvas id="chartRosie" width="560" height="300"></canvas>
-        </div>
-        <details>
-          <summary>Show data table</summary>
-          <table class="data-table" id="tableRosie"></table>
         </details>
       </div>
     </div>
